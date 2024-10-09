@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.trino</groupId>
-        <artifactId>trino-root</artifactId>
-        <version>460-SNAPSHOT</version>
+        <groupId>io.trion</groupId>
+        <artifactId>trion-root</artifactId>
+        <version>459</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
