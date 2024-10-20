@@ -17,11 +17,8 @@ import io.trino.sql.parser.SqlParser;
 
 public class Client
 {
-    public static void main(String[] args) {
+    private Client()
+    {
         SqlParser sqlParser = new SqlParser();
     }
-//    private Client()
-//    {
-//        SqlParser sqlParser = new SqlParser();
-//    }
 }

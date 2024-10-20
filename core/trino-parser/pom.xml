@@ -10,7 +10,17 @@
     </parent>
 
     <artifactId>trino-parser</artifactId>
+    <packaging>pom</packaging>
     <description>Trino - Parser</description>
+
+    <modules>
+        <module>../trino-grammar</module>
+    </modules>
+
+    <properties>
+        <!-- ToDo: Check if the following property can only be defined once in the root pom.xml -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -24,10 +34,10 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.trino</groupId>
-            <artifactId>trino-grammar</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.trino</groupId>-->
+<!--            <artifactId>trino-grammar</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>jakarta.annotation</groupId>
@@ -57,22 +67,23 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        ToDo: Understand why uncommenting the following made the build fail. -->
+<!--        <dependency>-->
+<!--            <groupId>org.junit.jupiter</groupId>-->
+<!--            <artifactId>junit-jupiter-api</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.jupiter</groupId>-->
+<!--            <artifactId>junit-jupiter-engine</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.jupiter</groupId>-->
+<!--            <artifactId>junit-jupiter-params</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

@@ -13,7 +13,9 @@
     <description>Trino - SQL grammar</description>
 
     <properties>
-        <project.build.targetJdk>8</project.build.targetJdk>
+<!--        <project.build.targetJdk>8</project.build.targetJdk>-->
+        <!-- ToDo: Check if the following property can only be defined once in the root pom.xml -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -39,11 +41,12 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        ToDo: Understand why uncommenting the following made the build fail. -->
+<!--        <dependency>-->
+<!--            <groupId>org.junit.jupiter</groupId>-->
+<!--            <artifactId>junit-jupiter-api</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
