@@ -131,7 +131,7 @@ public abstract class AbstractIntType
     }
 
     @Override
-    public final BlockBuilder createBlockBuilder(BlockBuilderStatus blockBuilderStatus, int expectedEntries)
+    public final BlockBuilder createBlockBuilder(BlockBuilderStatus blockBuilderStatus, int expectedEntries, int expectedBytesPerEntry)
     {
         int maxBlockSizeInBytes;
         if (blockBuilderStatus == null) {
@@ -143,6 +143,12 @@ public abstract class AbstractIntType
         return new IntArrayBlockBuilder(
                 blockBuilderStatus,
                 Math.min(expectedEntries, maxBlockSizeInBytes / Integer.BYTES));
+    }
+
+    @Override
+    public final BlockBuilder createBlockBuilder(BlockBuilderStatus blockBuilderStatus, int expectedEntries)
+    {
+        return createBlockBuilder(blockBuilderStatus, expectedEntries, Integer.BYTES);
     }
 
     @Override

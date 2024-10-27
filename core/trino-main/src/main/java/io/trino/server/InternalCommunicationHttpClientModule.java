@@ -33,17 +33,20 @@ public class InternalCommunicationHttpClientModule
 {
     private final String clientName;
     private final Class<? extends Annotation> annotation;
+    private final boolean withTracing;
     private final Consumer<HttpClientConfig> configDefaults;
     private final List<Class<? extends HttpRequestFilter>> filters;
 
     private InternalCommunicationHttpClientModule(
             String clientName,
             Class<? extends Annotation> annotation,
+            boolean withTracing,
             Consumer<HttpClientConfig> configDefaults,
             List<Class<? extends HttpRequestFilter>> filters)
     {
         this.clientName = requireNonNull(clientName, "clientName is null");
         this.annotation = requireNonNull(annotation, "annotation is null");
+        this.withTracing = withTracing;
         this.configDefaults = requireNonNull(configDefaults, "configDefaults is null");
         this.filters = ImmutableList.copyOf(requireNonNull(filters, "filters is null"));
     }
@@ -59,6 +62,11 @@ public class InternalCommunicationHttpClientModule
         });
 
         httpClientBindingBuilder.addFilterBinding().to(InternalAuthenticationManager.class);
+
+        if (withTracing) {
+            httpClientBindingBuilder.withTracing();
+        }
+
         filters.forEach(httpClientBindingBuilder::withFilter);
     }
 
@@ -93,6 +101,7 @@ public class InternalCommunicationHttpClientModule
     {
         private final String clientName;
         private final Class<? extends Annotation> annotation;
+        private boolean withTracing;
         private Consumer<HttpClientConfig> configDefaults = config -> {};
         private final List<Class<? extends HttpRequestFilter>> filters = new ArrayList<>();
 
@@ -100,6 +109,12 @@ public class InternalCommunicationHttpClientModule
         {
             this.clientName = requireNonNull(clientName, "clientName is null");
             this.annotation = requireNonNull(annotation, "annotation is null");
+        }
+
+        public Builder withTracing()
+        {
+            this.withTracing = true;
+            return this;
         }
 
         public Builder withConfigDefaults(Consumer<HttpClientConfig> configDefaults)
@@ -116,7 +131,7 @@ public class InternalCommunicationHttpClientModule
 
         public InternalCommunicationHttpClientModule build()
         {
-            return new InternalCommunicationHttpClientModule(clientName, annotation, configDefaults, filters);
+            return new InternalCommunicationHttpClientModule(clientName, annotation, withTracing, configDefaults, filters);
         }
     }
 

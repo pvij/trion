@@ -34,7 +34,7 @@ public class TestSingleDistributionSplitAssigner
     @Test
     public void testNoSources()
     {
-        Optional<HostAddress> hostRequirement = Optional.of(HostAddress.fromParts("localhost", 8080));
+        ImmutableSet<HostAddress> hostRequirement = ImmutableSet.of(HostAddress.fromParts("localhost", 8080));
         SplitAssigner splitAssigner = new SingleDistributionSplitAssigner(hostRequirement, ImmutableSet.of());
         SplitAssignerTester tester = new SplitAssignerTester();
 
@@ -49,7 +49,7 @@ public class TestSingleDistributionSplitAssigner
     @Test
     public void testEmptySource()
     {
-        Optional<HostAddress> hostRequirement = Optional.of(HostAddress.fromParts("localhost", 8080));
+        ImmutableSet<HostAddress> hostRequirement = ImmutableSet.of(HostAddress.fromParts("localhost", 8080));
         SplitAssigner splitAssigner = new SingleDistributionSplitAssigner(
                 hostRequirement,
                 ImmutableSet.of(PLAN_NODE_1));
@@ -70,7 +70,7 @@ public class TestSingleDistributionSplitAssigner
     public void testSingleSource()
     {
         SplitAssigner splitAssigner = new SingleDistributionSplitAssigner(
-                Optional.empty(),
+                ImmutableSet.of(),
                 ImmutableSet.of(PLAN_NODE_1));
         SplitAssignerTester tester = new SplitAssignerTester();
 
@@ -100,7 +100,7 @@ public class TestSingleDistributionSplitAssigner
     public void testMultipleSources()
     {
         SplitAssigner splitAssigner = new SingleDistributionSplitAssigner(
-                Optional.empty(),
+                ImmutableSet.of(),
                 ImmutableSet.of(PLAN_NODE_1, PLAN_NODE_2));
         SplitAssignerTester tester = new SplitAssignerTester();
 

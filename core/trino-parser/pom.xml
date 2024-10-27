@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.trion</groupId>
         <artifactId>trion-root</artifactId>
-        <version>459</version>
+        <version>1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,6 @@
         <dependency>
             <groupId>io.trino</groupId>
             <artifactId>trino-grammar</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -58,7 +57,7 @@
             <scope>test</scope>
         </dependency>
 
-<!--        ToDo: Understand why uncommenting the following made the build fail. -->
+        <!-- ToDo: Check -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

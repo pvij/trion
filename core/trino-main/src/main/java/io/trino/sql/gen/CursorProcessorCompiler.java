@@ -13,7 +13,6 @@
  */
 package io.trino.sql.gen;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.airlift.bytecode.BytecodeBlock;
@@ -237,13 +236,11 @@ public class CursorProcessorCompiler
         Variable wasNullVariable = scope.declareVariable(type(boolean.class), "wasNull");
 
         RowExpressionCompiler compiler = new RowExpressionCompiler(
-                classDefinition,
                 callSiteBinder,
                 cachedInstanceBinder,
                 fieldReferenceCompiler(cursor),
                 functionManager,
-                compiledLambdaMap,
-                ImmutableList.of(session, cursor));
+                compiledLambdaMap);
 
         LabelNode end = new LabelNode("end");
         method.getBody()
@@ -279,13 +276,11 @@ public class CursorProcessorCompiler
         Variable wasNullVariable = scope.declareVariable(type(boolean.class), "wasNull");
 
         RowExpressionCompiler compiler = new RowExpressionCompiler(
-                classDefinition,
                 callSiteBinder,
                 cachedInstanceBinder,
                 fieldReferenceCompiler(cursor),
                 functionManager,
-                compiledLambdaMap,
-                ImmutableList.of(session, cursor, output));
+                compiledLambdaMap);
 
         method.getBody()
                 .comment("boolean wasNull = false;")

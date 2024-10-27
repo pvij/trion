@@ -365,24 +365,24 @@ public class TestDirectExchangeClient
 
         assertThat(exchangeClient.pollPage()).isNull();
         ListenableFuture<Void> firstBlocked = exchangeClient.isBlocked();
-        assertThat(tryGetFutureValue(firstBlocked, 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(firstBlocked, 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(firstBlocked.isDone()).isFalse();
 
         assertThat(exchangeClient.pollPage()).isNull();
         ListenableFuture<Void> secondBlocked = exchangeClient.isBlocked();
-        assertThat(tryGetFutureValue(secondBlocked, 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(secondBlocked, 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(secondBlocked.isDone()).isFalse();
 
         assertThat(exchangeClient.pollPage()).isNull();
         ListenableFuture<Void> thirdBlocked = exchangeClient.isBlocked();
-        assertThat(tryGetFutureValue(thirdBlocked, 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(thirdBlocked, 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(thirdBlocked.isDone()).isFalse();
 
         thirdBlocked.cancel(true);
         assertThat(thirdBlocked.isDone()).isTrue();
-        assertThat(tryGetFutureValue(firstBlocked, 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(firstBlocked, 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(firstBlocked.isDone()).isFalse();
-        assertThat(tryGetFutureValue(secondBlocked, 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(secondBlocked, 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(secondBlocked.isDone()).isFalse();
 
         assertThat(exchangeClient.isFinished()).isFalse();
@@ -406,7 +406,7 @@ public class TestDirectExchangeClient
         assertThat(exchangeClient.isFinished()).isFalse();
         assertPageEquals(getNextPage(exchangeClient), createPage(6));
 
-        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS).isPresent()).isFalse();
         assertThat(exchangeClient.isFinished()).isFalse();
 
         exchangeClient.noMoreLocations();
@@ -459,7 +459,7 @@ public class TestDirectExchangeClient
 
         processor.setComplete(location1);
 
-        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS).isPresent()).isFalse();
 
         RuntimeException randomException = new RuntimeException("randomfailure");
         processor.setFailed(location2, randomException);
@@ -513,11 +513,11 @@ public class TestDirectExchangeClient
                 (taskId, failure) -> {});
 
         exchangeClient.addLocation(attempt0Task1, attempt0Task1Location);
-        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS).isPresent()).isFalse();
 
         exchangeClient.addLocation(attempt1Task1, attempt1Task1Location);
         exchangeClient.addLocation(attempt1Task2, attempt1Task2Location);
-        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS)).isEmpty();
+        assertThat(tryGetFutureValue(exchangeClient.isBlocked(), 10, MILLISECONDS).isPresent()).isFalse();
 
         exchangeClient.noMoreLocations();
         exchangeClient.isBlocked().get(10, SECONDS);

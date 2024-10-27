@@ -506,8 +506,7 @@ public class FeaturesConfig
         return faultTolerantExecutionExchangeEncryptionEnabled;
     }
 
-    @Config("fault-tolerant-execution-exchange-encryption-enabled")
-    @LegacyConfig("fault-tolerant-execution.exchange-encryption-enabled")
+    @Config("fault-tolerant-execution.exchange-encryption-enabled")
     public FeaturesConfig setFaultTolerantExecutionExchangeEncryptionEnabled(boolean faultTolerantExecutionExchangeEncryptionEnabled)
     {
         this.faultTolerantExecutionExchangeEncryptionEnabled = faultTolerantExecutionExchangeEncryptionEnabled;

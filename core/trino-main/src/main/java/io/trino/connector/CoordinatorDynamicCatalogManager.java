@@ -276,8 +276,8 @@ public class CoordinatorDynamicCatalogManager
             CatalogConnector catalog = allCatalogs.computeIfAbsent(
                     catalogProperties.catalogHandle(),
                     handle -> catalogFactory.createCatalog(catalogProperties));
-            catalogStore.addOrReplaceCatalog(catalogProperties);
             activeCatalogs.put(catalogName, catalog.getCatalog());
+            catalogStore.addOrReplaceCatalog(catalogProperties);
 
             log.debug("Added catalog: %s", catalog.getCatalogHandle());
         }

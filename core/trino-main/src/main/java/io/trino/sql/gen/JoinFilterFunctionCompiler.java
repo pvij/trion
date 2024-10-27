@@ -194,13 +194,11 @@ public class JoinFilterFunctionCompiler
         scope.declareVariable("session", body, method.getThis().getField(sessionField));
 
         RowExpressionCompiler compiler = new RowExpressionCompiler(
-                classDefinition,
                 callSiteBinder,
                 cachedInstanceBinder,
                 fieldReferenceCompiler(callSiteBinder, leftPosition, leftPage, rightPosition, rightPage, leftBlocksSize),
                 functionManager,
-                compiledLambdaMap,
-                ImmutableList.of(leftPage, leftPosition, rightPage, rightPosition));
+                compiledLambdaMap);
 
         BytecodeNode visitorBody = compiler.compile(filter, scope);
 

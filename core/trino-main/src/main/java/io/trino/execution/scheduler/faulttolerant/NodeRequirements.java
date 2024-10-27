@@ -13,14 +13,17 @@
  */
 package io.trino.execution.scheduler.faulttolerant;
 
+import com.google.common.collect.ImmutableSet;
 import io.trino.spi.HostAddress;
 import io.trino.spi.connector.CatalogHandle;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
+import static io.airlift.slice.SizeOf.estimatedSizeOf;
 import static io.airlift.slice.SizeOf.instanceSize;
 import static io.airlift.slice.SizeOf.sizeOf;
 import static java.util.Objects.requireNonNull;
@@ -30,14 +33,14 @@ public class NodeRequirements
     private static final int INSTANCE_SIZE = instanceSize(NodeRequirements.class);
 
     private final Optional<CatalogHandle> catalogHandle;
-    private final Optional<HostAddress> address;
+    private final Set<HostAddress> addresses;
     private final boolean remotelyAccessible;
 
-    public NodeRequirements(Optional<CatalogHandle> catalogHandle, Optional<HostAddress> address, boolean remotelyAccessible)
+    public NodeRequirements(Optional<CatalogHandle> catalogHandle, Set<HostAddress> addresses, boolean remotelyAccessible)
     {
-        checkArgument(remotelyAccessible || address.isPresent(), "addresses is empty and node is not remotely accessible");
+        checkArgument(remotelyAccessible || !addresses.isEmpty(), "addresses is empty and node is not remotely accessible");
         this.catalogHandle = requireNonNull(catalogHandle, "catalogHandle is null");
-        this.address = address;
+        this.addresses = ImmutableSet.copyOf(requireNonNull(addresses, "addresses is null"));
         this.remotelyAccessible = remotelyAccessible;
     }
 
@@ -52,9 +55,9 @@ public class NodeRequirements
     /*
      * Constrain execution to these nodes, if any
      */
-    public Optional<HostAddress> getAddress()
+    public Set<HostAddress> getAddresses()
     {
-        return address;
+        return addresses;
     }
 
     public boolean isRemotelyAccessible()
@@ -73,14 +76,14 @@ public class NodeRequirements
         }
         NodeRequirements that = (NodeRequirements) o;
         return Objects.equals(catalogHandle, that.catalogHandle)
-                && Objects.equals(address, that.address)
+                && Objects.equals(addresses, that.addresses)
                 && remotelyAccessible == that.remotelyAccessible;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(catalogHandle, address, remotelyAccessible);
+        return Objects.hash(catalogHandle, addresses, remotelyAccessible);
     }
 
     @Override
@@ -88,7 +91,7 @@ public class NodeRequirements
     {
         return toStringHelper(this)
                 .add("catalogHandle", catalogHandle)
-                .add("addresses", address)
+                .add("addresses", addresses)
                 .add("remotelyAccessible", remotelyAccessible)
                 .toString();
     }
@@ -97,6 +100,6 @@ public class NodeRequirements
     {
         return INSTANCE_SIZE
                 + sizeOf(catalogHandle, CatalogHandle::getRetainedSizeInBytes)
-                + sizeOf(address, HostAddress::getRetainedSizeInBytes);
+                + estimatedSizeOf(addresses, HostAddress::getRetainedSizeInBytes);
     }
 }

@@ -31,6 +31,7 @@ import io.trino.sql.planner.OrderingScheme;
 import io.trino.sql.planner.Symbol;
 import io.trino.type.FunctionType;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -232,8 +233,8 @@ public class AggregationNode
     {
         return aggregations.isEmpty() &&
                 !groupingSets.getGroupingKeys().isEmpty() &&
-                groupingSets.getGroupingSetCount() == 1 &&
-                outputs.size() == groupingSets.getGroupingKeys().size(); // grouping keys are always added to the outputs list, so a size match guarantees the two contain the same elements
+                outputs.size() == groupingSets.getGroupingKeys().size() &&
+                new HashSet<>(outputs).containsAll(groupingSets.getGroupingKeys());
     }
 
     public boolean isDecomposable(Session session, Metadata metadata)

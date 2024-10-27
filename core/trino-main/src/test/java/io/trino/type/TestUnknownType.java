@@ -25,7 +25,7 @@ public class TestUnknownType
     {
         super(UNKNOWN,
                 boolean.class,
-                UNKNOWN.createFixedSizeBlockBuilder(3)
+                UNKNOWN.createBlockBuilder(null, 3)
                         .appendNull()
                         .appendNull()
                         .appendNull()

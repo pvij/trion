@@ -28,7 +28,7 @@ public class TestDoubleMinAggregation
     @Override
     protected Block[] getSequenceBlocks(int start, int length)
     {
-        BlockBuilder blockBuilder = DOUBLE.createFixedSizeBlockBuilder(length);
+        BlockBuilder blockBuilder = DOUBLE.createBlockBuilder(null, length);
         for (int i = start; i < start + length; i++) {
             DOUBLE.writeDouble(blockBuilder, i);
         }

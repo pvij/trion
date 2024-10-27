@@ -217,11 +217,25 @@ public final class IndexedPriorityQueue<E>
         }
     }
 
-    public record Prioritized<V>(V value, long priority)
+    public static class Prioritized<V>
     {
-        public Prioritized
+        private final V value;
+        private final long priority;
+
+        public Prioritized(V value, long priority)
         {
-            requireNonNull(value, "value is null");
+            this.value = requireNonNull(value, "value is null");
+            this.priority = priority;
+        }
+
+        public V getValue()
+        {
+            return value;
+        }
+
+        public long getPriority()
+        {
+            return priority;
         }
     }
 }

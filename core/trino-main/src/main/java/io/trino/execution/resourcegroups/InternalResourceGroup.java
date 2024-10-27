@@ -15,7 +15,6 @@ package io.trino.execution.resourcegroups;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.ThreadSafe;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import io.airlift.stats.CounterStat;
@@ -32,6 +31,7 @@ import org.weakref.jmx.Managed;
 import org.weakref.jmx.Nested;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,10 +67,9 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Resource groups form a tree, and all access to a group is guarded by the root of the tree.
- * A group is considered a leaf if it has no subgroups, or all of its subgroups are disabled
- * and have no queued queries. Queries are submitted to leaf groups. Never to intermediate
- * groups. Intermediate groups aggregate resource consumption from their children, and may have
- * their own limitations that are enforced.
+ * Queries are submitted to leaf groups. Never to intermediate groups. Intermediate groups
+ * aggregate resource consumption from their children, and may have their own limitations that
+ * are enforced.
  */
 @ThreadSafe
 public class InternalResourceGroup
@@ -106,8 +105,6 @@ public class InternalResourceGroup
     private SchedulingPolicy schedulingPolicy = FAIR;
     @GuardedBy("root")
     private boolean jmxExport;
-    @GuardedBy("root")
-    private boolean disabled;
 
     // Live data structures
     // ====================
@@ -244,15 +241,17 @@ public class InternalResourceGroup
     private List<QueryStateInfo> getAggregatedRunningQueriesInfo()
     {
         synchronized (root) {
-            List<QueryStateInfo> thisGroupRunningQueries = runningQueries.keySet().stream()
-                    .map(ManagedQueryExecution::getBasicQueryInfo)
-                    .map(queryInfo -> createQueryStateInfo(queryInfo, Optional.of(id)))
-                    .collect(toImmutableList());
-            List<QueryStateInfo> subGroupsRunningQueries = subGroups.values().stream()
+            if (subGroups.isEmpty()) {
+                return runningQueries.keySet().stream()
+                        .map(ManagedQueryExecution::getBasicQueryInfo)
+                        .map(queryInfo -> createQueryStateInfo(queryInfo, Optional.of(id)))
+                        .collect(toImmutableList());
+            }
+
+            return subGroups.values().stream()
                     .map(InternalResourceGroup::getAggregatedRunningQueriesInfo)
                     .flatMap(List::stream)
                     .collect(toImmutableList());
-            return ImmutableList.copyOf(Iterables.concat(thisGroupRunningQueries, subGroupsRunningQueries));
         }
     }
 
@@ -297,7 +296,7 @@ public class InternalResourceGroup
     {
         synchronized (root) {
             // For leaf group, when no queries can run, all queued queries are waiting for resources on this resource group.
-            if (isLeafGroup()) {
+            if (subGroups.isEmpty()) {
                 return queuedQueries.size();
             }
 
@@ -310,22 +309,6 @@ public class InternalResourceGroup
             }
 
             return waitingQueuedQueries;
-        }
-    }
-
-    public int getQueriesQueuedOnInternal()
-    {
-        synchronized (root) {
-            if (isLeafGroup()) {
-                return min(getQueuedQueries(), softConcurrencyLimit - getRunningQueries());
-            }
-
-            int queriesQueuedInternal = 0;
-            for (InternalResourceGroup subGroup : subGroups.values()) {
-                queriesQueuedInternal += subGroup.getQueriesQueuedOnInternal();
-            }
-
-            return queriesQueuedInternal;
         }
     }
 
@@ -613,27 +596,11 @@ public class InternalResourceGroup
         jmxExportListener.accept(this, export);
     }
 
-    @Override
-    public boolean isDisabled()
-    {
-        synchronized (root) {
-            return disabled;
-        }
-    }
-
-    @Override
-    public void setDisabled(boolean disabled)
-    {
-        synchronized (root) {
-            this.disabled = disabled;
-        }
-    }
-
     public InternalResourceGroup getOrCreateSubGroup(String name)
     {
         requireNonNull(name, "name is null");
         synchronized (root) {
-            checkArgument(queuedQueries.isEmpty(), "Cannot add sub group to '%s' while queries are queued", id);
+            checkArgument(runningQueries.isEmpty() && queuedQueries.isEmpty(), "Cannot add sub group to %s while queries are running", id);
             if (subGroups.containsKey(name)) {
                 return subGroups.get(name);
             }
@@ -650,8 +617,8 @@ public class InternalResourceGroup
     public void run(ManagedQueryExecution query)
     {
         synchronized (root) {
-            if (!isLeafGroup()) {
-                throw new TrinoException(INVALID_RESOURCE_GROUP, format("Cannot add queries to '%s'. It is not a leaf group.", id));
+            if (!subGroups.isEmpty()) {
+                throw new TrinoException(INVALID_RESOURCE_GROUP, format("Cannot add queries to %s. It is not a leaf group.", id));
             }
             // Check all ancestors for capacity
             InternalResourceGroup group = this;
@@ -818,29 +785,34 @@ public class InternalResourceGroup
         synchronized (root) {
             ResourceUsage groupUsageDelta = new ResourceUsage(0, 0);
 
-            for (Map.Entry<ManagedQueryExecution, ResourceUsage> entry : runningQueries.entrySet()) {
-                ManagedQueryExecution query = entry.getKey();
-                ResourceUsage oldResourceUsage = entry.getValue();
+            if (subGroups.isEmpty()) {
+                // Leaf resource group
+                for (Map.Entry<ManagedQueryExecution, ResourceUsage> entry : runningQueries.entrySet()) {
+                    ManagedQueryExecution query = entry.getKey();
+                    ResourceUsage oldResourceUsage = entry.getValue();
 
-                ResourceUsage newResourceUsage = new ResourceUsage(
-                        query.getTotalCpuTime().toMillis(),
-                        query.getTotalMemoryReservation().toBytes());
+                    ResourceUsage newResourceUsage = new ResourceUsage(
+                            query.getTotalCpuTime().toMillis(),
+                            query.getTotalMemoryReservation().toBytes());
 
-                // Compute delta and update usage
-                ResourceUsage queryUsageDelta = newResourceUsage.subtract(oldResourceUsage);
-                entry.setValue(newResourceUsage);
-                groupUsageDelta = groupUsageDelta.add(queryUsageDelta);
+                    // Compute delta and update usage
+                    ResourceUsage queryUsageDelta = newResourceUsage.subtract(oldResourceUsage);
+                    entry.setValue(newResourceUsage);
+                    groupUsageDelta = groupUsageDelta.add(queryUsageDelta);
+                }
+
+                cachedResourceUsage = cachedResourceUsage.add(groupUsageDelta);
             }
+            else {
+                // Intermediate resource group
+                for (InternalResourceGroup subGroup : dirtySubGroups) {
+                    ResourceUsage subGroupUsageDelta = subGroup.updateResourceUsageAndGetDelta();
+                    groupUsageDelta = groupUsageDelta.add(subGroupUsageDelta);
+                    cachedResourceUsage = cachedResourceUsage.add(subGroupUsageDelta);
 
-            cachedResourceUsage = cachedResourceUsage.add(groupUsageDelta);
-
-            for (InternalResourceGroup subGroup : dirtySubGroups) {
-                ResourceUsage subGroupUsageDelta = subGroup.updateResourceUsageAndGetDelta();
-                groupUsageDelta = groupUsageDelta.add(subGroupUsageDelta);
-                cachedResourceUsage = cachedResourceUsage.add(subGroupUsageDelta);
-
-                if (!subGroupUsageDelta.equals(new ResourceUsage(0, 0))) {
-                    subGroup.updateEligibility();
+                    if (!subGroupUsageDelta.equals(new ResourceUsage(0, 0))) {
+                        subGroup.updateEligibility();
+                    }
                 }
             }
 
@@ -1005,11 +977,10 @@ public class InternalResourceGroup
         }
     }
 
-    private boolean isLeafGroup()
+    public Collection<InternalResourceGroup> subGroups()
     {
         synchronized (root) {
-            return subGroups.values().stream()
-                    .allMatch(subGroup -> subGroup.isDisabled() && subGroup.getQueuedQueries() == 0);
+            return subGroups.values();
         }
     }
 

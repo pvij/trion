@@ -92,7 +92,6 @@ import static io.airlift.bytecode.expression.BytecodeExpressions.not;
 import static io.trino.cache.SafeCaches.buildNonEvictableCache;
 import static io.trino.operator.project.PageFieldsToInputParametersRewriter.rewritePageFieldsToInputParameters;
 import static io.trino.spi.StandardErrorCode.COMPILER_ERROR;
-import static io.trino.spi.StandardErrorCode.QUERY_EXCEEDED_COMPILER_LIMIT;
 import static io.trino.sql.gen.BytecodeUtils.generateWrite;
 import static io.trino.sql.gen.BytecodeUtils.invoke;
 import static io.trino.sql.gen.LambdaExpressionExtractor.extractLambdaExpressions;
@@ -207,7 +206,7 @@ public class PageFunctionCompiler
         }
         catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof MethodTooLargeException) {
-                throw new TrinoException(QUERY_EXCEEDED_COMPILER_LIMIT,
+                throw new TrinoException(COMPILER_ERROR,
                         "Query exceeded maximum columns. Please reduce the number of columns referenced and re-run the query.", e);
             }
             throw new TrinoException(COMPILER_ERROR, e);
@@ -359,13 +358,11 @@ public class PageFunctionCompiler
 
         Variable wasNullVariable = scope.declareVariable("wasNull", body, constantFalse());
         RowExpressionCompiler compiler = new RowExpressionCompiler(
-                classDefinition,
                 callSiteBinder,
                 cachedInstanceBinder,
                 fieldReferenceCompilerProjection(callSiteBinder),
                 functionManager,
-                compiledLambdaMap,
-                ImmutableList.of(session, position));
+                compiledLambdaMap);
 
         body.append(thisVariable.getField(blockBuilder))
                 .append(compiler.compile(projection, scope))
@@ -403,7 +400,7 @@ public class PageFunctionCompiler
         }
         catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof MethodTooLargeException) {
-                throw new TrinoException(QUERY_EXCEEDED_COMPILER_LIMIT,
+                throw new TrinoException(COMPILER_ERROR,
                         "Query exceeded maximum filters. Please reduce the number of filters referenced and re-run the query.", e);
             }
             throw new TrinoException(COMPILER_ERROR, filter.toString(), e.getCause());
@@ -545,13 +542,11 @@ public class PageFunctionCompiler
 
         Variable wasNullVariable = scope.declareVariable("wasNull", body, constantFalse());
         RowExpressionCompiler compiler = new RowExpressionCompiler(
-                classDefinition,
                 callSiteBinder,
                 cachedInstanceBinder,
                 fieldReferenceCompiler(callSiteBinder),
                 functionManager,
-                compiledLambdaMap,
-                ImmutableList.of(page, position));
+                compiledLambdaMap);
 
         Variable result = scope.declareVariable(boolean.class, "result");
         body.append(compiler.compile(filter, scope))

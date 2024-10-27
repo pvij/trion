@@ -31,7 +31,7 @@ public class TestBitwiseAndAggregation
     @Override
     protected Block[] getSequenceBlocks(int start, int length)
     {
-        BlockBuilder blockBuilder = BIGINT.createFixedSizeBlockBuilder(length);
+        BlockBuilder blockBuilder = BIGINT.createBlockBuilder(null, length);
 
         for (int i = start; i < start + length; i++) {
             BIGINT.writeLong(blockBuilder, i);

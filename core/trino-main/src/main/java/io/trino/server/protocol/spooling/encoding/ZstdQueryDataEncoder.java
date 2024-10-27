@@ -22,7 +22,7 @@ import java.io.OutputStream;
 public class ZstdQueryDataEncoder
         extends CompressedQueryDataEncoder
 {
-    private static final int COMPRESSION_THRESHOLD = 8192;
+    private static final int COMPRESSION_THRESHOLD = 2048;
 
     public ZstdQueryDataEncoder(QueryDataEncoder delegate)
     {

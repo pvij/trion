@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.airlift.json.JsonCodec;
 import io.airlift.log.Logger;
 
@@ -28,6 +27,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -246,17 +246,15 @@ public final class JwkDecoder
     {
         private final String kty;
         private final Optional<String> kid;
-        private final Map<String, Object> other;
+        private final Map<String, Object> other = new HashMap<>();
 
         @JsonCreator
         public Key(
                 @JsonProperty("kty") String kty,
-                @JsonProperty("kid") Optional<String> kid,
-                @JsonAnySetter Map<String, Object> other)
+                @JsonProperty("kid") Optional<String> kid)
         {
             this.kty = requireNonNull(kty, "kty is null");
             this.kid = requireNonNull(kid, "kid is null");
-            this.other = ImmutableMap.copyOf(other);
         }
 
         public String getKty()
@@ -276,6 +274,12 @@ public final class JwkDecoder
                 return Optional.of((String) value);
             }
             return Optional.empty();
+        }
+
+        @JsonAnySetter
+        public void set(String name, Object value)
+        {
+            other.put(name, value);
         }
     }
 }

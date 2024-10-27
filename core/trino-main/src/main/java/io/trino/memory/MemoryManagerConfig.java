@@ -16,7 +16,6 @@ package io.trino.memory;
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
 import io.airlift.configuration.DefunctConfig;
-import io.airlift.configuration.LegacyConfig;
 import io.airlift.units.DataSize;
 import jakarta.validation.constraints.NotNull;
 
@@ -152,8 +151,7 @@ public class MemoryManagerConfig
         return faultTolerantExecutionMemoryRequirementIncreaseOnWorkerCrashEnabled;
     }
 
-    @Config("fault-tolerant-execution-memory-requirement-increase-on-worker-crash-enabled")
-    @LegacyConfig("fault-tolerant-execution.memory-requirement-increase-on-worker-crash-enabled")
+    @Config("fault-tolerant-execution.memory-requirement-increase-on-worker-crash-enabled")
     @ConfigDescription("Increase memory requirement for tasks failed due to a suspected worker crash")
     public MemoryManagerConfig setFaultTolerantExecutionMemoryRequirementIncreaseOnWorkerCrashEnabled(boolean faultTolerantExecutionMemoryRequirementIncreaseOnWorkerCrashEnabled)
     {

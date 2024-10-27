@@ -815,13 +815,7 @@ public class TestArbitraryDistributionSplitAssigner
             }
         }
         assertThat(taskNodeRequirements.getCatalogHandle()).isEqualTo(Optional.of(TEST_CATALOG_HANDLE));
-        if (hostRequirement != null) {
-            assertThat(taskNodeRequirements.getAddress()).isPresent();
-            assertThat(hostRequirement).contains(taskNodeRequirements.getAddress().orElseThrow());
-        }
-        else {
-            assertThat(taskNodeRequirements.getAddress()).isEmpty();
-        }
+        assertThat(taskNodeRequirements.getAddresses()).containsAnyElementsOf(hostRequirement == null ? ImmutableSet.of() : hostRequirement);
     }
 
     private static void assertSplitsEqual(ListMultimap<PlanNodeId, Split> actual, ListMultimap<PlanNodeId, Split> expected)

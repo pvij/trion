@@ -58,7 +58,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.airlift.concurrent.Threads.daemonThreadsNamed;
-import static io.trino.execution.QueryState.FINISHING;
 import static io.trino.execution.QueryState.QUEUED;
 import static io.trino.execution.QueryState.RUNNING;
 import static io.trino.spi.StandardErrorCode.QUERY_TEXT_TOO_LARGE;
@@ -328,14 +327,6 @@ public class DispatchManager
     {
         return queryTracker.getAllQueries().stream()
                 .filter(query -> query.getState() == RUNNING)
-                .count();
-    }
-
-    @Managed
-    public long getFinishingQueries()
-    {
-        return queryTracker.getAllQueries().stream()
-                .filter(query -> query.getState() == FINISHING)
                 .count();
     }
 

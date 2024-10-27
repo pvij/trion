@@ -52,7 +52,7 @@ public class RemoveRedundantDistinctAggregation
         implements Rule<AggregationNode>
 {
     private static final Pattern<AggregationNode> PATTERN = aggregation()
-            .matching(AggregationNode::producesDistinctRows);
+            .matching(RemoveRedundantDistinctAggregation::isDistinctOnlyAggregation);
 
     @Override
     public Pattern<AggregationNode> getPattern()
@@ -70,6 +70,11 @@ public class RemoveRedundantDistinctAggregation
         else {
             return Result.empty();
         }
+    }
+
+    private static boolean isDistinctOnlyAggregation(AggregationNode node)
+    {
+        return node.producesDistinctRows() && node.getGroupingSetCount() == 1;
     }
 
     private static boolean isDistinctOverGroupingKeys(PlanNode node, Lookup lookup, Set<Symbol> parentSymbols)

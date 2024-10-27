@@ -169,7 +169,7 @@ public class TestQueryStateInfoResource
                         .build(),
                 createJsonResponseHandler(listJsonCodec(QueryStateInfo.class)));
 
-        assertThat(infos).isEmpty();
+        assertThat(infos.isEmpty()).isTrue();
     }
 
     @Test

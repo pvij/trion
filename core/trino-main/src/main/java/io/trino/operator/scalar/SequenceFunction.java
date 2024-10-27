@@ -95,7 +95,7 @@ public final class SequenceFunction
 
         int length = checkMaxEntry(diffDate(MONTH, start, stop) / step + 1);
 
-        BlockBuilder blockBuilder = DATE.createFixedSizeBlockBuilder(length);
+        BlockBuilder blockBuilder = DATE.createBlockBuilder(null, length);
 
         long value = 0;
         for (int i = 0; i < length; ++i) {
@@ -112,7 +112,7 @@ public final class SequenceFunction
 
         int length = getLength(start, stop, step);
 
-        BlockBuilder blockBuilder = type.createFixedSizeBlockBuilder(length);
+        BlockBuilder blockBuilder = type.createBlockBuilder(null, length);
         for (long i = 0, value = start; i < length; ++i, value += step) {
             type.writeLong(blockBuilder, value);
         }

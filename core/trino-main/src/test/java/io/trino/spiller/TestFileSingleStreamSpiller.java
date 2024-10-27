@@ -114,7 +114,7 @@ public class TestFileSingleStreamSpiller
                     encryption);
             LocalMemoryContext memoryContext = newSimpleAggregatedMemoryContext().newLocalMemoryContext("test");
             SingleStreamSpiller singleStreamSpiller = spillerFactory.create(TYPES, bytes -> {}, memoryContext);
-            assertThat(singleStreamSpiller).isInstanceOf(FileSingleStreamSpiller.class);
+            assertThat(singleStreamSpiller instanceof FileSingleStreamSpiller).isTrue();
             FileSingleStreamSpiller spiller = (FileSingleStreamSpiller) singleStreamSpiller;
 
             Page page = buildPage();
@@ -168,8 +168,8 @@ public class TestFileSingleStreamSpiller
 
     private Page buildPage()
     {
-        BlockBuilder col1 = BIGINT.createFixedSizeBlockBuilder(1);
-        BlockBuilder col2 = DOUBLE.createFixedSizeBlockBuilder(1);
+        BlockBuilder col1 = BIGINT.createBlockBuilder(null, 1);
+        BlockBuilder col2 = DOUBLE.createBlockBuilder(null, 1);
         BlockBuilder col3 = VARBINARY.createBlockBuilder(null, 1);
 
         BIGINT.writeLong(col1, 42);

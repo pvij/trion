@@ -171,13 +171,14 @@ public final class CatalogHandle
 
     @Experimental(eta = "2023-02-01")
     public static final class CatalogVersion
+            implements Comparable<CatalogVersion>
     {
         private static final int INSTANCE_SIZE = instanceSize(CatalogVersion.class);
 
         private final String version;
 
         /**
-         * Version of a catalog.
+         * Version of a catalog.  The string maybe compared lexicographically using ASCII, and to determine which catalog version is newer.
          */
         @JsonCreator
         public CatalogVersion(String version)
@@ -201,6 +202,12 @@ public final class CatalogHandle
                     ('a' <= c && c <= 'z') ||
                     c == '_' ||
                     c == '-';
+        }
+
+        @Override
+        public int compareTo(CatalogVersion other)
+        {
+            return version.compareTo(other.version);
         }
 
         @Override

@@ -23,7 +23,6 @@ import io.trino.client.JsonCodec;
 import io.trino.client.QueryData;
 import io.trino.client.QueryResults;
 import io.trino.client.RawQueryData;
-import io.trino.client.ResultRowsDecoder;
 import io.trino.client.StatementStats;
 import io.trino.server.protocol.spooling.QueryDataJacksonModule;
 import org.junit.jupiter.api.Test;
@@ -35,6 +34,7 @@ import java.util.OptionalDouble;
 import java.util.Set;
 
 import static io.trino.client.ClientStandardTypes.BIGINT;
+import static io.trino.client.FixJsonDataUtils.fixData;
 import static io.trino.client.JsonCodec.jsonCodec;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,33 +94,29 @@ public class TestQueryResultsSerialization
 
     @Test
     public void testEmptyArraySerialization()
-            throws Exception
     {
         testRoundTrip(RawQueryData.of(ImmutableList.of()), "[]");
 
         assertThatThrownBy(() -> testRoundTrip(RawQueryData.of(ImmutableList.of(ImmutableList.of())), "[[]]"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Unexpected token END_ARRAY");
+                .hasMessage("row/column size mismatch");
     }
 
     @Test
     public void testSerialization()
-            throws Exception
     {
         QueryData values = RawQueryData.of(ImmutableList.of(ImmutableList.of(1L), ImmutableList.of(5L)));
         testRoundTrip(values, "[[1],[5]]");
     }
 
     private void testRoundTrip(QueryData results, String expectedDataRepresentation)
-            throws Exception
     {
         assertThat(serialize(results))
                 .isEqualToIgnoringWhitespace(queryResultsJson(expectedDataRepresentation));
 
         String serialized = serialize(results);
-        try (ResultRowsDecoder decoder = new ResultRowsDecoder()) {
-            assertThat(decoder.toRows(COLUMNS, CLIENT_CODEC.fromJson(serialized).getData()))
-                    .containsAll(decoder.toRows(COLUMNS, results));
+        try {
+            assertThat(fixData(COLUMNS, CLIENT_CODEC.fromJson(serialized).getData().getData())).hasSameElementsAs(results.getData());
         }
         catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);

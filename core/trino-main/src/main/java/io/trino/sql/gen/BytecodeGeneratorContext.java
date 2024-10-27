@@ -13,10 +13,7 @@
  */
 package io.trino.sql.gen;
 
-import com.google.common.collect.ImmutableList;
 import io.airlift.bytecode.BytecodeNode;
-import io.airlift.bytecode.ClassDefinition;
-import io.airlift.bytecode.Parameter;
 import io.airlift.bytecode.Scope;
 import io.airlift.bytecode.Variable;
 import io.trino.metadata.FunctionManager;
@@ -43,24 +40,19 @@ public class BytecodeGeneratorContext
     private final CachedInstanceBinder cachedInstanceBinder;
     private final FunctionManager functionManager;
     private final Variable wasNull;
-    private final ClassDefinition classDefinition;
-    private final List<Parameter> contextArguments;  // arguments that need to be propagated to generated methods to be able to resolve underlying references, session, etc.
 
     public BytecodeGeneratorContext(
             RowExpressionCompiler rowExpressionCompiler,
             Scope scope,
             CallSiteBinder callSiteBinder,
             CachedInstanceBinder cachedInstanceBinder,
-            FunctionManager functionManager,
-            ClassDefinition classDefinition,
-            List<Parameter> contextArguments)
+            FunctionManager functionManager)
     {
         requireNonNull(rowExpressionCompiler, "rowExpressionCompiler is null");
         requireNonNull(cachedInstanceBinder, "cachedInstanceBinder is null");
         requireNonNull(scope, "scope is null");
         requireNonNull(callSiteBinder, "callSiteBinder is null");
         requireNonNull(functionManager, "functionManager is null");
-        requireNonNull(classDefinition, "classDefinition is null");
 
         this.rowExpressionCompiler = rowExpressionCompiler;
         this.scope = scope;
@@ -68,8 +60,6 @@ public class BytecodeGeneratorContext
         this.cachedInstanceBinder = cachedInstanceBinder;
         this.functionManager = functionManager;
         this.wasNull = scope.getVariable("wasNull");
-        this.classDefinition = classDefinition;
-        this.contextArguments = ImmutableList.copyOf(contextArguments);
     }
 
     public Scope getScope()
@@ -119,30 +109,5 @@ public class BytecodeGeneratorContext
     public Variable wasNull()
     {
         return wasNull;
-    }
-
-    public ClassDefinition getClassDefinition()
-    {
-        return classDefinition;
-    }
-
-    public RowExpressionCompiler getRowExpressionCompiler()
-    {
-        return rowExpressionCompiler;
-    }
-
-    public CachedInstanceBinder getCachedInstanceBinder()
-    {
-        return cachedInstanceBinder;
-    }
-
-    public FunctionManager getFunctionManager()
-    {
-        return functionManager;
-    }
-
-    public List<Parameter> getContextArguments()
-    {
-        return contextArguments;
     }
 }
