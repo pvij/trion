@@ -14,11 +14,18 @@
 package io.trion.client;
 
 import io.trino.sql.parser.SqlParser;
+import io.trino.sql.tree.Statement;
 
 public class Client
 {
-    private Client()
+    public static void main(String[] args)
     {
         SqlParser sqlParser = new SqlParser();
+        // parse the query, predicate analysis <table:some_table, column: uuid, value: 20>
+        // Only single value and range value predicates are returned (didn't understand this)
+        Statement statement = sqlParser.createStatement("SELECT * FROM abc.def where age < 50 and age >= 23");
+        System.out.println("------running------");
+        System.out.println(statement);
+        // last update
     }
 }

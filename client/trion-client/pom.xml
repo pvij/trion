@@ -6,27 +6,22 @@
         <groupId>io.trion</groupId>
         <artifactId>trion-root</artifactId>
         <version>459</version>
-<!--        ToDo: Understand why the following is not required. -->
-<!--        <relativePath>../../pom.xml</relativePath>-->
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>trion-client</artifactId>
-    <packaging>pom</packaging>
     <description>Trion - Client</description>
-
-    <modules>
-        <module>../../core/trino-parser</module>
-    </modules>
 
     <!--    <properties>-->
 <!-- ToDo: Understand what the following means -->
     <!--        <project.build.targetJdk>8</project.build.targetJdk>-->
     <!--    </properties>-->
 
-<!--    <dependencies>-->
-<!--        <dependency>-->
-<!--            <groupId>io.trino</groupId>-->
-<!--            <artifactId>trino-parser</artifactId>-->
-<!--        </dependency>-->
-<!--    </dependencies>-->
+    <dependencies>
+        <dependency>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-parser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
